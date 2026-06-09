@@ -6,7 +6,7 @@ A web-based carbon footprint tracker built for the **HackerSkill Challenge 3**. 
 
 ## 🔗 Live Demo
 
-👉 [View Live App](https://YOUR_USERNAME.github.io/ecotrace)
+👉 [View Live App]((https://aryan-developer613.github.io/ecotrace/))
 
 ---
 
