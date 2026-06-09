@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoTrace — Know Your Carbon Footprint</title>
+<meta name="description" content="Track, understand, and reduce your daily carbon footprint with real-time insights, education, and personalised action plans.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* ── dashboard pills ── */
+.d-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;margin:3px 3px 0 0;}
+/* ── track rows ── */
+.a-rows{padding:0 1.25rem .75rem;}
+.a-row{display:grid;grid-template-columns:28px 1fr 140px 80px auto;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);}
+.a-row:last-child{border-bottom:none;}
+.a-row-em{font-size:18px;text-align:center;}
+.a-row-name{font-size:13px;font-weight:500;color:var(--text);}
+.a-row-unit{font-size:11px;color:var(--text-muted);}
+.a-row-inp-w{display:flex;align-items:center;gap:4px;background:var(--gray-50);border:1px solid var(--border);border-radius:var(--r-sm);padding:5px 10px;}
+.a-row-inp{width:64px;border:none;background:transparent;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);outline:none;}
+.a-row-inp-unit{font-size:10px;color:var(--text-muted);white-space:nowrap;}
+.a-row-co2{font-size:12px;font-weight:600;color:var(--green-dark);text-align:right;}
+/* responsive adjustments */
+@media(max-width:600px){
+  .a-row{grid-template-columns:24px 1fr 100px;gap:6px;}
+  .a-row-co2,.a-row-badge{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════
+     LANDING
+════════════════════════════════════════════ -->
+<div id="page-landing">
+
+  <nav class="l-nav">
+    <a class="l-logo" href="#"><span class="l-logo-leaf">🌿</span>EcoTrace</a>
+    <div class="l-nav-links">
+      <a href="#how-it-works">How it works</a>
+      <a href="#education">Why it matters</a>
+      <a href="#features">Features</a>
+    </div>
+    <button class="l-cta" onclick="launchApp()">Start tracking →</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="l-hero">
+    <div class="l-hero-eyebrow">🌍 Carbon Footprint Awareness Platform</div>
+    <h1 class="l-hero-title">
+      The average Indian emits<br>
+      <span class="l-hero-accent">4.8 kg of CO₂</span><br>
+      every single day.
+    </h1>
+    <p class="l-hero-body">
+      Most people have no idea how much carbon their habits produce.
+      EcoTrace makes it visible — and actionable.
+    </p>
+    <div class="l-hero-actions">
+      <button class="btn-green" onclick="launchApp()">Track my footprint →</button>
+      <a class="btn-outline" href="#how-it-works">See how it works</a>
+    </div>
+
+    <!-- Live counter strip -->
+    <div class="l-ticker">
+      <div class="l-tick-item">
+        <span class="l-tick-val" id="tick-global">0</span>
+        <span class="l-tick-lbl">tonnes CO₂ emitted globally today</span>
+      </div>
+      <div class="l-tick-sep"></div>
+      <div class="l-tick-item">
+        <span class="l-tick-val">4.8 kg</span>
+        <span class="l-tick-lbl">India daily avg per person</span>
+      </div>
+      <div class="l-tick-sep"></div>
+      <div class="l-tick-item">
+        <span class="l-tick-val">47%</span>
+        <span class="l-tick-lbl">reduction possible with lifestyle change</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="l-section" id="how-it-works">
+    <div class="l-section-eyebrow">How it works</div>
+    <h2 class="l-section-title">Three steps to a greener you</h2>
+    <div class="l-steps">
+      <div class="l-step">
+        <div class="l-step-num">01</div>
+        <div class="l-step-icon">📝</div>
+        <h3>Log your day</h3>
+        <p>Enter your transport, energy use, food choices, and purchases. Takes under 2 minutes.</p>
+      </div>
+      <div class="l-step-arrow">→</div>
+      <div class="l-step">
+        <div class="l-step-num">02</div>
+        <div class="l-step-icon">📊</div>
+        <h3>See your impact</h3>
+        <p>Instant CO₂ calculation with comparisons to national and global averages.</p>
+      </div>
+      <div class="l-step-arrow">→</div>
+      <div class="l-step">
+        <div class="l-step-num">03</div>
+        <div class="l-step-icon">🎯</div>
+        <h3>Take action</h3>
+        <p>Get personalised, ranked suggestions based on your biggest emission sources.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDUCATION SECTION -->
+  <section class="l-edu" id="education">
+    <div class="l-edu-inner">
+      <div class="l-edu-left">
+        <div class="l-section-eyebrow light">Why it matters</div>
+        <h2 class="l-edu-title">Climate change starts with individual choices</h2>
+        <p class="l-edu-body">
+          Individual lifestyle choices account for up to <strong>70% of global CO₂ emissions</strong> when supply chains are included. Yet most people have never calculated their own footprint.
+        </p>
+        <p class="l-edu-body">
+          The gap between knowing and acting is information. EcoTrace bridges it — showing you exactly where your emissions come from, how they compare, and what you can do today.
+        </p>
+        <button class="btn-green" onclick="launchApp()">Start for free →</button>
+      </div>
+      <div class="l-edu-right">
+        <div class="l-fact-card">
+          <div class="l-fact-num">1.5°C</div>
+          <div class="l-fact-label">The Paris Agreement warming limit</div>
+          <div class="l-fact-body">We have until ~2030 to halve global emissions to stay on track.</div>
+        </div>
+        <div class="l-fact-card">
+          <div class="l-fact-num">2.3T</div>
+          <div class="l-fact-label">Tonnes of CO₂ India emits yearly</div>
+          <div class="l-fact-body">India is the 3rd largest emitter globally, and per-capita emissions are rising fast.</div>
+        </div>
+        <div class="l-fact-card">
+          <div class="l-fact-num">40%</div>
+          <div class="l-fact-label">From homes & transport</div>
+          <div class="l-fact-body">Residential energy use and personal transport are among the most changeable emission sources.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="l-section" id="features">
+    <div class="l-section-eyebrow">What's inside</div>
+    <h2 class="l-section-title">Everything you need to understand your impact</h2>
+    <div class="l-features">
+      <div class="l-feat">
+        <div class="l-feat-icon" style="background:#E1F5EE">📊</div>
+        <h3>Real-time CO₂ tracker</h3>
+        <p>Log 20+ activities across transport, home energy, food, and shopping. Emissions update as you type.</p>
+      </div>
+      <div class="l-feat">
+        <div class="l-feat-icon" style="background:#E6F1FB">🎯</div>
+        <h3>Eco score & benchmarks</h3>
+        <p>Get rated 0–100. Compare yourself to India, world, and US daily averages. Know where you stand.</p>
+      </div>
+      <div class="l-feat">
+        <div class="l-feat-icon" style="background:#FAEEDA">💡</div>
+        <h3>Actionable tips</h3>
+        <p>Personalised suggestions ranked by your actual data — with estimated savings per action.</p>
+      </div>
+      <div class="l-feat">
+        <div class="l-feat-icon" style="background:#EAF3DE">🌳</div>
+        <h3>Visual equivalents</h3>
+        <p>Understand your emissions in trees, car km, and phone charges. Makes CO₂ real and tangible.</p>
+      </div>
+      <div class="l-feat">
+        <div class="l-feat-icon" style="background:#FAECE7">📅</div>
+        <h3>30-day history</h3>
+        <p>Track progress over time. See your best day, weekly average, and improvement streaks.</p>
+      </div>
+      <div class="l-feat">
+        <div class="l-feat-icon" style="background:#EDE9FE">🇮🇳</div>
+        <h3>India-specific data</h3>
+        <p>Carbon factors based on India CEA grid intensity, LPG, CNG autos, and local food systems.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <section class="l-final-cta">
+    <h2>Ready to know your number?</h2>
+    <p>It takes under 2 minutes. No sign-up. No tracking. Your data stays on your device.</p>
+    <button class="btn-green large" onclick="launchApp()">Calculate my carbon footprint →</button>
+  </section>
+
+  <footer class="l-footer">
+    <div class="l-footer-logo">🌿 EcoTrace</div>
+    <div class="l-footer-links">
+      <span>Carbon factors: IPCC AR6 · India CEA 2024 · FAO lifecycle data</span>
+    </div>
+    <div class="l-footer-copy">Built for HackerSkill Challenge 3 · Carbon Footprint Awareness Platform</div>
+  </footer>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     APP
+════════════════════════════════════════════ -->
+<div id="page-app" class="hidden">
+
+  <header class="a-header">
+    <button class="a-back" onclick="goLanding()" title="Back to home">← <span>EcoTrace</span></button>
+    <nav class="a-tabs">
+      <button class="a-tab active" data-tab="track"    onclick="switchTab('track',this)">📝 Track</button>
+      <button class="a-tab"        data-tab="insights" onclick="switchTab('insights',this)">📊 Insights</button>
+      <button class="a-tab"        data-tab="learn"    onclick="switchTab('learn',this)">📚 Learn</button>
+      <button class="a-tab"        data-tab="tips"     onclick="switchTab('tips',this)">💡 Tips</button>
+      <button class="a-tab"        data-tab="history"  onclick="switchTab('history',this)">📅 History</button>
+    </nav>
+    <div class="a-header-date" id="a-date"></div>
+  </header>
+
+  <!-- DASHBOARD STRIP -->
+  <div class="a-dash">
+    <div class="a-dash-main">
+      <div class="a-dash-label">Today's footprint</div>
+      <div class="a-dash-big">
+        <span class="a-dash-num mono" id="d-num">0.0</span>
+        <span class="a-dash-unit">kg CO₂e</span>
+      </div>
+      <div class="a-dash-sub" id="d-sub">Log your activities below to see your impact</div>
+      <div class="a-dash-pills" id="d-pills"></div>
+    </div>
+
+    <div class="a-dash-ring-wrap">
+      <svg width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Eco score ring">
+        <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="11"/>
+        <circle id="score-ring" cx="60" cy="60" r="50" fill="none" stroke="white"
+          stroke-width="11" stroke-linecap="round"
+          stroke-dasharray="314" stroke-dashoffset="314"
+          transform="rotate(-90 60 60)" style="transition:stroke-dashoffset 0.9s cubic-bezier(.4,0,.2,1)"/>
+      </svg>
+      <div class="a-dash-ring-inner">
+        <div class="a-dash-score mono" id="d-score">—</div>
+        <div class="a-dash-score-lbl">eco score</div>
+      </div>
+    </div>
+
+    <div class="a-dash-stats">
+      <div class="a-stat"><div class="a-stat-v mono" id="d-week">0.0</div><div class="a-stat-l">Weekly est. (kg)</div></div>
+      <div class="a-stat"><div class="a-stat-v mono" id="d-trees">0</div><div class="a-stat-l">Trees to offset</div></div>
+      <div class="a-stat"><div class="a-stat-v mono" id="d-vs">—</div><div class="a-stat-l">vs India avg</div></div>
+    </div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="a-progress-bar-wrap">
+    <div class="a-progress-bar" id="a-progress-bar" style="width:0%"></div>
+  </div>
+
+  <main class="a-main">
+
+    <!-- ── TRACK ── -->
+    <div id="tab-track" class="a-panel active">
+      <p class="a-panel-hint">Enter amounts for each activity — CO₂ is calculated in real time.</p>
+
+      <div class="a-card" id="card-transport">
+        <div class="a-card-hd">
+          <span class="a-card-ic" style="background:#FEE2E2">🚗</span>
+          <div><div class="a-card-title">Transport</div><div class="a-card-sub">How you moved today</div></div>
+          <div class="a-card-tot" id="ctot-transport">0.00 kg</div>
+        </div>
+      </div>
+
+      <div class="a-card" id="card-home">
+        <div class="a-card-hd">
+          <span class="a-card-ic" style="background:#FEF3C7">⚡</span>
+          <div><div class="a-card-title">Home energy</div><div class="a-card-sub">Electricity, gas, appliances</div></div>
+          <div class="a-card-tot" id="ctot-home">0.00 kg</div>
+        </div>
+      </div>
+
+      <div class="a-card" id="card-food">
+        <div class="a-card-hd">
+          <span class="a-card-ic" style="background:#D1FAE5">🥗</span>
+          <div><div class="a-card-title">Food & diet</div><div class="a-card-sub">What you ate today</div></div>
+          <div class="a-card-tot" id="ctot-food">0.00 kg</div>
+        </div>
+      </div>
+
+      <div class="a-card" id="card-shopping">
+        <div class="a-card-hd">
+          <span class="a-card-ic" style="background:#EDE9FE">🛍️</span>
+          <div><div class="a-card-title">Shopping & goods</div><div class="a-card-sub">Purchases & consumption</div></div>
+          <div class="a-card-tot" id="ctot-shopping">0.00 kg</div>
+        </div>
+      </div>
+
+      <div class="a-actions">
+        <button class="btn-green" onclick="saveDay()">💾 Save today's log</button>
+        <button class="btn-ghost-sm" onclick="resetDay()">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- ── INSIGHTS ── -->
+    <div id="tab-insights" class="a-panel">
+      <div id="ins-empty" class="a-empty">
+        <div class="a-empty-icon">📊</div>
+        <div class="a-empty-title">Nothing logged yet</div>
+        <div class="a-empty-body">Head to the Track tab and enter your day's activities to see your insights.</div>
+        <button class="btn-green sm" onclick="switchTab('track',document.querySelector('[data-tab=track]'))">Go to Track →</button>
+      </div>
+      <div id="ins-content" class="hidden">
+        <div class="ins-two-col">
+          <div class="a-card pad">
+            <div class="a-ins-label">Emissions by category</div>
+            <div id="ins-cat-bars"></div>
+          </div>
+          <div class="a-card pad">
+            <div class="a-ins-label">How you compare (kg/day)</div>
+            <div id="ins-comp-bars"></div>
+          </div>
+        </div>
+        <div class="a-card pad" style="margin-bottom:1rem">
+          <div class="a-ins-label">Top contributors today</div>
+          <div id="ins-top"></div>
+        </div>
+        <div class="a-card pad">
+          <div class="a-ins-label">Your emissions in perspective</div>
+          <div class="ins-equiv-grid" id="ins-equiv"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LEARN ── -->
+    <div id="tab-learn" class="a-panel">
+      <div class="learn-hero">
+        <h2 class="learn-hero-title">Understanding your carbon footprint</h2>
+        <p class="learn-hero-body">Carbon dioxide (CO₂) and other greenhouse gases trap heat in the atmosphere, driving climate change. Your personal footprint is the total amount of these gases released as a result of your daily actions.</p>
+      </div>
+
+      <div class="learn-grid">
+        <div class="learn-card green">
+          <div class="learn-card-icon">🌡️</div>
+          <h3>What is a carbon footprint?</h3>
+          <p>A carbon footprint measures the total greenhouse gas emissions caused by a person, organisation, or activity — expressed in tonnes or kg of CO₂ equivalent (CO₂e).</p>
+          <div class="learn-stat-row">
+            <div class="learn-stat"><strong>4.8 kg</strong><span>India avg / day</span></div>
+            <div class="learn-stat"><strong>12 kg</strong><span>World avg / day</span></div>
+            <div class="learn-stat"><strong>47 kg</strong><span>US avg / day</span></div>
+          </div>
+        </div>
+
+        <div class="learn-card blue">
+          <div class="learn-card-icon">🚗</div>
+          <h3>Transport is a major driver</h3>
+          <p>In India, personal vehicles and aviation contribute significantly to urban carbon footprints. A petrol car emits <strong>210g CO₂ per km</strong>. Switching to metro or bus reduces this by 5–6×.</p>
+          <div class="learn-compare">
+            <div class="learn-cmp-row"><span>Petrol car</span><div class="learn-cmp-bar" style="width:100%;background:#ef4444"></div><span>210g/km</span></div>
+            <div class="learn-cmp-row"><span>Motorbike</span><div class="learn-cmp-bar" style="width:52%;background:#f97316"></div><span>110g/km</span></div>
+            <div class="learn-cmp-row"><span>Bus</span><div class="learn-cmp-bar" style="width:42%;background:#f59e0b"></div><span>89g/km</span></div>
+            <div class="learn-cmp-row"><span>Metro</span><div class="learn-cmp-bar" style="width:20%;background:#22c55e"></div><span>41g/km</span></div>
+            <div class="learn-cmp-row"><span>Walking</span><div class="learn-cmp-bar" style="width:2%;background:#16a34a"></div><span>0g/km</span></div>
+          </div>
+        </div>
+
+        <div class="learn-card amber">
+          <div class="learn-card-icon">🍽️</div>
+          <h3>Diet has a huge impact</h3>
+          <p>Food production accounts for ~26% of global emissions. What you eat matters enormously — beef emits 22× more CO₂ than lentils per 100g of protein.</p>
+          <div class="learn-compare">
+            <div class="learn-cmp-row"><span>Beef</span><div class="learn-cmp-bar" style="width:100%;background:#ef4444"></div><span>3.3 kg/serving</span></div>
+            <div class="learn-cmp-row"><span>Chicken</span><div class="learn-cmp-bar" style="width:22%;background:#f97316"></div><span>0.72 kg</span></div>
+            <div class="learn-cmp-row"><span>Dairy</span><div class="learn-cmp-bar" style="width:18%;background:#f59e0b"></div><span>0.60 kg</span></div>
+            <div class="learn-cmp-row"><span>Rice</span><div class="learn-cmp-bar" style="width:16%;background:#eab308"></div><span>0.55 kg</span></div>
+            <div class="learn-cmp-row"><span>Dal/veg</span><div class="learn-cmp-bar" style="width:5%;background:#22c55e"></div><span>0.15 kg</span></div>
+          </div>
+        </div>
+
+        <div class="learn-card teal">
+          <div class="learn-card-icon">⚡</div>
+          <h3>India's electricity grid</h3>
+          <p>India's grid emission factor is <strong>0.82 kg CO₂ per kWh</strong> — higher than many countries because coal still dominates. As renewables grow, this number drops.</p>
+          <div class="learn-stat-row">
+            <div class="learn-stat"><strong>0.82</strong><span>kg CO₂/kWh India</span></div>
+            <div class="learn-stat"><strong>0.23</strong><span>kg CO₂/kWh France</span></div>
+            <div class="learn-stat"><strong>0.04</strong><span>kg CO₂/kWh Norway</span></div>
+          </div>
+        </div>
+
+        <div class="learn-card purple">
+          <div class="learn-card-icon">🌱</div>
+          <h3>The 1.5°C pathway</h3>
+          <p>To limit warming to 1.5°C, global per-capita emissions must drop to ~2.5 tonnes/year (~6.8 kg/day) by 2030. India's current avg is 4.8 kg/day — close, but rising.</p>
+          <div class="learn-stat-row">
+            <div class="learn-stat"><strong>6.8 kg</strong><span>2030 global target</span></div>
+            <div class="learn-stat"><strong>4.8 kg</strong><span>India today</span></div>
+            <div class="learn-stat"><strong>47 kg</strong><span>US today</span></div>
+          </div>
+        </div>
+
+        <div class="learn-card coral">
+          <div class="learn-card-icon">🛍️</div>
+          <h3>Hidden emissions in shopping</h3>
+          <p>Manufacturing a single smartphone produces ~70 kg CO₂. A T-shirt uses ~2,700 litres of water and emits ~10 kg CO₂. Fast fashion and electronics upgrades add up fast.</p>
+          <div class="learn-stat-row">
+            <div class="learn-stat"><strong>70 kg</strong><span>per smartphone</span></div>
+            <div class="learn-stat"><strong>10 kg</strong><span>per clothing item</span></div>
+            <div class="learn-stat"><strong>0.5 kg</strong><span>per delivery</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="learn-quiz-prompt">
+        <div class="learn-quiz-icon">🧠</div>
+        <div>
+          <div class="learn-quiz-title">Now track your own day</div>
+          <div class="learn-quiz-body">You've learned the basics — put it into practice and see where your emissions come from.</div>
+        </div>
+        <button class="btn-green" onclick="switchTab('track',document.querySelector('[data-tab=track]'))">Go to Track →</button>
+      </div>
+    </div>
+
+    <!-- ── TIPS ── -->
+    <div id="tab-tips" class="a-panel">
+      <div class="tips-header">
+        <h2 class="tips-hdr-title">Your action plan</h2>
+        <p class="tips-hdr-sub" id="tips-sub">Personalised suggestions — log activities for ranked recommendations</p>
+      </div>
+      <div id="tips-list"></div>
+    </div>
+
+    <!-- ── HISTORY ── -->
+    <div id="tab-history" class="a-panel">
+      <div class="hist-summary" id="hist-summary" style="display:none">
+        <div class="hist-summ-item"><div class="hist-summ-val mono" id="hs-avg">—</div><div class="hist-summ-lbl">7-day avg</div></div>
+        <div class="hist-summ-item"><div class="hist-summ-val mono" id="hs-best">—</div><div class="hist-summ-lbl">Best day</div></div>
+        <div class="hist-summ-item"><div class="hist-summ-val mono" id="hs-logged">0</div><div class="hist-summ-lbl">Days logged</div></div>
+      </div>
+      <div class="a-card">
+        <div class="a-card-hd">
+          <span class="a-card-ic" style="background:#DBEAFE">📅</span>
+          <div class="a-card-title">Daily log</div>
+        </div>
+        <div id="hist-rows">
+          <div class="a-empty">
+            <div class="a-empty-icon">📅</div>
+            <div class="a-empty-title">No logs yet</div>
+            <div class="a-empty-body">Save today's entry from the Track tab to start your history.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
