@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- SECURITY: CSP header via meta tag -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; img-src 'self' data:; connect-src 'none';">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="Referrer-Policy" content="no-referrer">
+<title>EcoTrace — Carbon Footprint Awareness Platform</title>
+<meta name="description" content="Track, understand, and reduce your personal carbon footprint with real-time insights and personalized actions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- SKIP TO MAIN CONTENT (Accessibility) -->
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<!-- LANDING PAGE -->
+<div id="landing" role="main">
+  <nav class="landing-nav" role="navigation" aria-label="Main navigation">
+    <div class="logo" role="banner" aria-label="EcoTrace home"><span class="logo-icon" aria-hidden="true">🌿</span><span>EcoTrace</span></div>
+    <button class="cta-btn" onclick="startApp()" aria-label="Start tracking your carbon footprint">Start Tracking →</button>
+  </nav>
+
+  <section class="hero-section" aria-labelledby="hero-heading">
+    <div class="hero-badge" role="note">🌍 Carbon Footprint Awareness Platform</div>
+    <h1 id="hero-heading" class="hero-title">Every action has<br><span class="hero-gradient">a carbon cost.</span><br>Know yours.</h1>
+    <p class="hero-desc">Track your daily habits across transport, energy, and food. Get personalized insights and take action to reduce your impact on the planet.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="startApp()" aria-label="Start tracking for free">Start for free →</button>
+      <button class="btn-ghost" onclick="scrollToFeatures()" aria-label="Scroll to features section">See features ↓</button>
+    </div>
+    <div class="hero-stats" role="region" aria-label="Key statistics">
+      <div class="hstat"><strong>4.7B+</strong><span>tonnes CO₂ from India yearly</span></div>
+      <div class="hstat-div" aria-hidden="true"></div>
+      <div class="hstat"><strong>12 kg</strong><span>world avg per person/day</span></div>
+      <div class="hstat-div" aria-hidden="true"></div>
+      <div class="hstat"><strong>47%</strong><span>reduction possible with lifestyle changes</span></div>
+    </div>
+  </section>
+
+  <section class="features-section" id="features" aria-labelledby="features-heading">
+    <h2 id="features-heading" class="feat-label">What EcoTrace does</h2>
+    <div class="features-grid" role="list">
+      <div class="feat-card" role="listitem">
+        <div class="feat-icon" style="background:#E1F5EE" aria-hidden="true">📊</div>
+        <h3>Real-time tracking</h3>
+        <p>Log transport, home energy and food habits. See your CO₂ calculated instantly as you type.</p>
+      </div>
+      <div class="feat-card" role="listitem">
+        <div class="feat-icon" style="background:#E6F1FB" aria-hidden="true">🎯</div>
+        <h3>Personalized insights</h3>
+        <p>Compare yourself to India, world, and US averages. Identify your biggest contributors.</p>
+      </div>
+      <div class="feat-card" role="listitem">
+        <div class="feat-icon" style="background:#FAEEDA" aria-hidden="true">💡</div>
+        <h3>Actionable tips</h3>
+        <p>Get specific suggestions ranked by your actual data — not generic advice.</p>
+      </div>
+      <div class="feat-card" role="listitem">
+        <div class="feat-icon" style="background:#FAECE7" aria-hidden="true">📅</div>
+        <h3>Daily history</h3>
+        <p>Track your progress over time. See trends and celebrate improvements.</p>
+      </div>
+      <div class="feat-card" role="listitem">
+        <div class="feat-icon" style="background:#EAF3DE" aria-hidden="true">🏆</div>
+        <h3>Eco score</h3>
+        <p>Get rated 0–100 based on your footprint. Aim for green and beat the average.</p>
+      </div>
+      <div class="feat-card" role="listitem">
+        <div class="feat-icon" style="background:#FBEAF0" aria-hidden="true">🌱</div>
+        <h3>Tree equivalents</h3>
+        <p>Understand your emissions in trees needed to offset — makes it real and tangible.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section" aria-labelledby="cta-heading">
+    <div class="cta-box">
+      <h2 id="cta-heading">Ready to know your footprint?</h2>
+      <p>It takes under 2 minutes to log your first day. No sign-up needed.</p>
+      <button class="btn-primary large" onclick="startApp()" aria-label="Get started tracking your carbon footprint for free">Get started — it's free →</button>
+    </div>
+  </section>
+
+  <footer class="landing-footer" role="contentinfo">
+    <div>EcoTrace · Built for HackerSkill Challenge 3 · Carbon factors: IPCC &amp; India CEA 2024</div>
+  </footer>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" class="hidden" role="application" aria-label="EcoTrace carbon tracking application">
+
+  <!-- TOP NAV -->
+  <header class="app-header" role="banner">
+    <div class="app-logo" onclick="goLanding()" role="button" tabindex="0"
+         onkeydown="if(event.key==='Enter'||event.key===' ')goLanding()"
+         aria-label="Go back to EcoTrace home page">🌿 <span>EcoTrace</span></div>
+    <nav class="app-nav" role="navigation" aria-label="App sections">
+      <button class="anav-btn active" data-tab="track" onclick="switchTab('track',this)"
+              aria-selected="true" role="tab" aria-controls="tab-track" id="nav-track">
+        <span aria-hidden="true">📝</span> Track
+      </button>
+      <button class="anav-btn" data-tab="insights" onclick="switchTab('insights',this)"
+              aria-selected="false" role="tab" aria-controls="tab-insights" id="nav-insights">
+        <span aria-hidden="true">📊</span> Insights
+      </button>
+      <button class="anav-btn" data-tab="tips" onclick="switchTab('tips',this)"
+              aria-selected="false" role="tab" aria-controls="tab-tips" id="nav-tips">
+        <span aria-hidden="true">💡</span> Tips
+      </button>
+      <button class="anav-btn" data-tab="history" onclick="switchTab('history',this)"
+              aria-selected="false" role="tab" aria-controls="tab-history" id="nav-history">
+        <span aria-hidden="true">📅</span> History
+      </button>
+    </nav>
+    <div class="app-date" id="app-date" aria-live="polite"></div>
+  </header>
+
+  <!-- HERO DASHBOARD STRIP -->
+  <div class="dash-strip" role="region" aria-label="Carbon footprint summary dashboard">
+    <div class="dash-main">
+      <div class="dash-label" id="dash-label">Today's footprint</div>
+      <div class="dash-co2" aria-live="polite" aria-atomic="true" aria-labelledby="dash-label">
+        <span id="dash-num" class="mono">0.0</span>
+        <span class="dash-unit">kg CO₂e</span>
+      </div>
+      <div class="dash-sub" id="dash-sub" role="status" aria-live="polite">Start logging your activities below</div>
+      <div class="dash-badges" id="dash-badges" aria-live="polite"></div>
+    </div>
+    <div class="dash-center" aria-label="Eco score indicator">
+      <div class="score-wrap" role="img" id="score-container" aria-label="Eco score: not yet calculated">
+        <svg width="130" height="130" viewBox="0 0 130 130" aria-hidden="true" focusable="false">
+          <title>Eco score ring</title>
+          <circle cx="65" cy="65" r="56" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="12"/>
+          <circle id="score-circle" cx="65" cy="65" r="56" fill="none" stroke="white"
+            stroke-width="12" stroke-linecap="round" stroke-dasharray="352"
+            stroke-dashoffset="352" transform="rotate(-90 65 65)" style="transition:stroke-dashoffset 0.8s ease"/>
+        </svg>
+        <div class="score-inner">
+          <div id="score-val" class="score-num mono" aria-live="polite">—</div>
+          <div class="score-sub">eco score</div>
+        </div>
+      </div>
+    </div>
+    <div class="dash-right" role="region" aria-label="Additional statistics">
+      <div class="mini-stat">
+        <div class="mini-val mono" id="m-week" aria-live="polite">0.0</div>
+        <div class="mini-lbl" id="lbl-week">Est. weekly kg</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-val mono" id="m-trees" aria-live="polite">0</div>
+        <div class="mini-lbl" id="lbl-trees">Trees to offset</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-val mono" id="m-vs" aria-live="polite">—</div>
+        <div class="mini-lbl" id="lbl-vs">vs India avg</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <main class="app-main" id="main-content">
+
+    <!-- TRACK TAB -->
+    <div id="tab-track" class="tab-content active" role="tabpanel" aria-labelledby="nav-track">
+      <p class="track-hint">Log each activity — CO₂ is calculated in real time.</p>
+
+      <div class="act-card" id="card-transport" role="region" aria-labelledby="transport-heading">
+        <div class="act-card-header">
+          <div class="act-card-icon" style="background:#FAECE7" aria-hidden="true">🚗</div>
+          <div>
+            <div class="act-card-title" id="transport-heading">Transport</div>
+            <div class="act-card-sub">How you moved today</div>
+          </div>
+          <div class="act-card-total" id="tot-transport" aria-live="polite" aria-label="Transport total emissions">0.00 kg</div>
+        </div>
+      </div>
+
+      <div class="act-card" id="card-home" role="region" aria-labelledby="home-heading">
+        <div class="act-card-header">
+          <div class="act-card-icon" style="background:#FAEEDA" aria-hidden="true">⚡</div>
+          <div>
+            <div class="act-card-title" id="home-heading">Home energy</div>
+            <div class="act-card-sub">Electricity, gas, appliances</div>
+          </div>
+          <div class="act-card-total" id="tot-home" aria-live="polite" aria-label="Home energy total emissions">0.00 kg</div>
+        </div>
+      </div>
+
+      <div class="act-card" id="card-food" role="region" aria-labelledby="food-heading">
+        <div class="act-card-header">
+          <div class="act-card-icon" style="background:#EAF3DE" aria-hidden="true">🥗</div>
+          <div>
+            <div class="act-card-title" id="food-heading">Food &amp; diet</div>
+            <div class="act-card-sub">What you ate today</div>
+          </div>
+          <div class="act-card-total" id="tot-food" aria-live="polite" aria-label="Food total emissions">0.00 kg</div>
+        </div>
+      </div>
+
+      <div class="act-card" id="card-shopping" role="region" aria-labelledby="shopping-heading">
+        <div class="act-card-header">
+          <div class="act-card-icon" style="background:#FBEAF0" aria-hidden="true">🛍️</div>
+          <div>
+            <div class="act-card-title" id="shopping-heading">Shopping &amp; goods</div>
+            <div class="act-card-sub">Purchases and consumption</div>
+          </div>
+          <div class="act-card-total" id="tot-shopping" aria-live="polite" aria-label="Shopping total emissions">0.00 kg</div>
+        </div>
+      </div>
+
+      <div class="save-row">
+        <button class="save-btn" onclick="saveDay()" aria-label="Save today's carbon footprint log">
+          💾 Save today's log
+        </button>
+        <button class="reset-btn" onclick="resetDay()" aria-label="Reset all today's activity inputs">↺ Reset</button>
+      </div>
+    </div>
+
+    <!-- INSIGHTS TAB -->
+    <div id="tab-insights" class="tab-content" role="tabpanel" aria-labelledby="nav-insights">
+      <div id="insights-empty" class="empty-state" role="status">
+        <div class="empty-icon" aria-hidden="true">📊</div>
+        <div class="empty-title">No data yet</div>
+        <div class="empty-body">Log your activities on the Track tab to see your insights.</div>
+        <button class="btn-primary small" onclick="switchTab('track', document.querySelector('[data-tab=track]'))"
+                aria-label="Go to Track tab to log activities">Go to Track →</button>
+      </div>
+      <div id="insights-content" class="hidden">
+        <div class="insights-top">
+          <div class="ins-card" role="region" aria-labelledby="cat-breakdown-heading">
+            <div class="ins-label" id="cat-breakdown-heading">Category breakdown</div>
+            <div id="cat-bars" role="list" aria-label="Emissions by category"></div>
+          </div>
+          <div class="ins-card" role="region" aria-labelledby="compare-heading">
+            <div class="ins-label" id="compare-heading">How you compare (kg/day)</div>
+            <div id="compare-bars" role="list" aria-label="Emissions comparison with averages"></div>
+          </div>
+        </div>
+        <div class="ins-card full-width" role="region" aria-labelledby="top-contrib-heading">
+          <div class="ins-label" id="top-contrib-heading">Top contributors today</div>
+          <div id="top-contributors" role="list" aria-label="Top emission sources"></div>
+        </div>
+        <div class="ins-card full-width" role="region" aria-labelledby="equiv-heading">
+          <div class="ins-label" id="equiv-heading">Environmental equivalents</div>
+          <div class="equiv-grid" id="equiv-grid" role="list" aria-label="Environmental impact equivalents"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIPS TAB -->
+    <div id="tab-tips" class="tab-content" role="tabpanel" aria-labelledby="nav-tips">
+      <div class="tips-header">
+        <div class="tips-header-title" id="tips-heading">Personalised for your footprint</div>
+        <div class="tips-header-sub" id="tips-sub" aria-live="polite">Ranked by where you can save the most</div>
+      </div>
+      <div id="tips-list" role="list" aria-label="Carbon reduction tips" aria-labelledby="tips-heading"></div>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div id="tab-history" class="tab-content" role="tabpanel" aria-labelledby="nav-history">
+      <div class="history-summary" id="history-summary" style="display:none" role="region" aria-label="Historical summary stats">
+        <div class="hsumm-item"><div class="hsumm-val mono" id="hs-avg" aria-label="7-day average">—</div><div class="hsumm-lbl">7-day avg</div></div>
+        <div class="hsumm-item"><div class="hsumm-val mono" id="hs-best" aria-label="Best day emissions">—</div><div class="hsumm-lbl">Best day</div></div>
+        <div class="hsumm-item"><div class="hsumm-val mono" id="hs-streak" aria-label="Number of days logged">0</div><div class="hsumm-lbl">Day streak</div></div>
+      </div>
+      <div class="act-card" role="region" aria-labelledby="history-heading">
+        <div class="act-card-header">
+          <div class="act-card-icon" style="background:#E6F1FB" aria-hidden="true">📅</div>
+          <div class="act-card-title" id="history-heading">Daily logs</div>
+        </div>
+        <div id="history-list" role="list" aria-label="Daily carbon footprint history">
+          <div class="empty-state small" role="status">
+            <div class="empty-icon" aria-hidden="true">📅</div>
+            <div class="empty-title">No history yet</div>
+            <div class="empty-body">Save today's entry to start your log.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Live region for toast announcements -->
+<div role="alert" aria-live="assertive" aria-atomic="true" class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

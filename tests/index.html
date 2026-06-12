@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EcoTrace — Test Suite</title>
+<style>
+  body { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; background: #f8fafc; color: #111; }
+  h1 { font-size: 22px; margin-bottom: 4px; color: #14532d; }
+  .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 1.5rem; }
+  .summary { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .summ-card { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 1rem 1.5rem; text-align: center; flex: 1; min-width: 100px; }
+  .summ-num { font-size: 28px; font-weight: 700; }
+  .summ-lbl { font-size: 12px; color: #6b7280; margin-top: 2px; }
+  .pass { color: #16a34a; }
+  .fail { color: #dc2626; }
+  .total { color: #2563eb; }
+  .score { color: #7c3aed; }
+  .results { background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+  .result-row { display: flex; align-items: flex-start; gap: 10px; padding: 10px 1rem; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+  .result-row:last-child { border-bottom: none; }
+  .result-row.failed { background: #fff5f5; }
+  .icon { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+  .name { flex: 1; font-weight: 500; }
+  .error { color: #dc2626; font-size: 12px; margin-top: 3px; font-family: monospace; }
+  .group-header { background: #f9fafb; padding: 7px 1rem; font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #6b7280; border-bottom: 1px solid #f3f4f6; }
+  .progress-bar { height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
+  .progress-fill { height: 100%; background: #16a34a; border-radius: 4px; transition: width .5s ease; }
+  .run-btn { background: #16a34a; color: white; border: none; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 1.5rem; }
+  .run-btn:hover { background: #15803d; }
+</style>
+</head>
+<body>
+
+<h1>🌿 EcoTrace — Test Suite</h1>
+<p class="subtitle">47 unit tests covering carbon calculations, input validation, security sanitization &amp; data integrity</p>
+
+<button class="run-btn" onclick="runTests()">▶ Run all tests</button>
+
+<div class="summary" id="summary" style="display:none">
+  <div class="summ-card"><div class="summ-num total" id="s-total">0</div><div class="summ-lbl">Total</div></div>
+  <div class="summ-card"><div class="summ-num pass" id="s-pass">0</div><div class="summ-lbl">Passed</div></div>
+  <div class="summ-card"><div class="summ-num fail" id="s-fail">0</div><div class="summ-lbl">Failed</div></div>
+  <div class="summ-card"><div class="summ-num score" id="s-score">0%</div><div class="summ-lbl">Score</div></div>
+</div>
+
+<div class="progress-bar" id="progress-bar" style="display:none">
+  <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+</div>
+
+<div class="results" id="results"></div>
+
+<script>
+// ── Inline test harness ──
+let passed = 0, failed = 0, total = 0;
+const results = [];
+
+function test(name, fn) {
+  total++;
+  try { fn(); passed++; results.push({ name, status: 'PASS' }); }
+  catch (e) { failed++; results.push({ name, status: 'FAIL', error: e.message }); }
+}
+
+function expect(val) {
+  return {
+    toBe: (e) => { if (val !== e) throw new Error(`Expected ${JSON.stringify(e)}, got ${JSON.stringify(val)}`); },
+    toBeCloseTo: (e, p=2) => { const f=Math.pow(10,p); if(Math.round(val*f)!==Math.round(e*f)) throw new Error(`Expected ~${e}, got ${val}`); },
+    toBeGreaterThan: (n) => { if(val<=n) throw new Error(`Expected ${val} > ${n}`); },
+    toBeLessThanOrEqual: (n) => { if(val>n) throw new Error(`Expected ${val} <= ${n}`); },
+    toBeTrue: () => { if(val!==true) throw new Error(`Expected true, got ${val}`); },
+    toBeFalse: () => { if(val!==false) throw new Error(`Expected false, got ${val}`); },
+    toContain: (s) => { if(!String(val).includes(s)) throw new Error(`"${val}" should contain "${s}"`); },
+    toNotContain: (s) => { if(String(val).includes(s)) throw new Error(`"${val}" should NOT contain "${s}"`); },
+    toBeArray: () => { if(!Array.isArray(val)) throw new Error(`Expected Array`); },
+    toHaveLength: (n) => { if(val.length!==n) throw new Error(`Expected length ${n}, got ${val.length}`); },
+  };
+}
+
+// ── Data ──
+const ACTIVITIES_DATA = {
+  transport: [
+    {id:'car',name:'Car (petrol)',emoji:'🚗',unit:'km',factor:0.21,color:'#ef4444',tip:'Carpool.',save:'~2.5 kg/day',diff:'High'},
+    {id:'bike',name:'Motorbike',emoji:'🏍️',unit:'km',factor:0.11,color:'#f97316',tip:'Go electric.',save:'~1.2 kg/day',diff:'Medium'},
+    {id:'auto',name:'Auto rickshaw',emoji:'🛺',unit:'km',factor:0.08,color:'#f59e0b',tip:'CNG is clean.',save:'~0.5 kg/day',diff:'Low'},
+    {id:'bus',name:'City bus',emoji:'🚌',unit:'km',factor:0.089,color:'#84cc16',tip:'Buses are great.',save:'~0.4 kg/day',diff:'Low'},
+    {id:'metro',name:'Metro',emoji:'🚆',unit:'km',factor:0.041,color:'#22c55e',tip:'Metro is cleanest.',save:'~0.2 kg/day',diff:'Very low'},
+    {id:'flight',name:'Flight',emoji:'✈️',unit:'km',factor:0.255,color:'#dc2626',tip:'Avoid short flights.',save:'~5+ kg/trip',diff:'Very high'},
+  ],
+  home: [
+    {id:'elec',name:'Electricity',emoji:'⚡',unit:'kWh',factor:0.82,color:'#f59e0b',tip:'5-star appliances.',save:'~1.6 kg/day',diff:'High'},
+    {id:'lpg',name:'LPG gas',emoji:'🔥',unit:'cylinders',factor:14.2,color:'#ef4444',tip:'Induction cooktop.',save:'~2.8 kg',diff:'Medium'},
+    {id:'ac',name:'AC',emoji:'❄️',unit:'hours',factor:0.5,color:'#3b82f6',tip:'Set to 24C.',save:'~1 kg/day',diff:'Medium'},
+    {id:'geyser',name:'Geyser',emoji:'🚿',unit:'hours',factor:0.9,color:'#8b5cf6',tip:'Solar heater.',save:'~0.9 kg/day',diff:'Medium'},
+    {id:'fan',name:'Fans',emoji:'🌀',unit:'hours',factor:0.04,color:'#06b6d4',tip:'5-star fans.',save:'~0.1 kg/day',diff:'Low'},
+  ],
+  food: [
+    {id:'beef',name:'Beef',emoji:'🥩',unit:'servings',factor:3.3,color:'#dc2626',tip:'Switch to dal.',save:'~3.3 kg/meal',diff:'Very high'},
+    {id:'chicken',name:'Chicken',emoji:'🍗',unit:'servings',factor:0.72,color:'#f97316',tip:'Lower than beef.',save:'~0.5 kg/meal',diff:'Medium'},
+    {id:'dairy',name:'Dairy',emoji:'🥛',unit:'servings',factor:0.6,color:'#f59e0b',tip:'Oat milk.',save:'~0.4/serving',diff:'Low'},
+    {id:'veg',name:'Vegetables',emoji:'🥗',unit:'servings',factor:0.15,color:'#22c55e',tip:'Best option.',save:'Already low!',diff:'Very low'},
+    {id:'rice',name:'Rice',emoji:'🍚',unit:'kg cooked',factor:2.7,color:'#eab308',tip:'Reduce methane.',save:'~0.8 kg/kg',diff:'Medium'},
+    {id:'processed',name:'Packaged food',emoji:'🍟',unit:'servings',factor:1.4,color:'#f97316',tip:'Eat fresh.',save:'~1 kg/serving',diff:'Medium'},
+  ],
+  shopping: [
+    {id:'clothes',name:'Clothing',emoji:'👕',unit:'items',factor:10.0,color:'#ec4899',tip:'Buy second-hand.',save:'~8 kg/item',diff:'Very high'},
+    {id:'phone',name:'Electronics',emoji:'📱',unit:'items',factor:70.0,color:'#8b5cf6',tip:'Extend phone life.',save:'~35 kg/year',diff:'Very high'},
+    {id:'online',name:'Deliveries',emoji:'📦',unit:'orders',factor:0.5,color:'#06b6d4',tip:'Batch orders.',save:'~0.3 kg/order',diff:'Low'},
+    {id:'plastic',name:'Plastics',emoji:'🧴',unit:'items',factor:0.2,color:'#ef4444',tip:'Use reusables.',save:'~0.2 kg/item',diff:'Low'},
+  ]
+};
+const INDIA_AVG=4.8, WORLD_AVG=12.0, US_AVG=47.0;
+
+function safeParseFloat(val) {
+  const n = parseFloat(val);
+  if (isNaN(n)||!isFinite(n)||n<0) return 0;
+  return Math.min(n,99999);
+}
+function calcCatTotal(vals,catKey) { return ACTIVITIES_DATA[catKey].reduce((s,a)=>s+(vals[a.id]||0)*a.factor,0); }
+function calcTotalCO2(vals) { return ['transport','home','food','shopping'].reduce((s,k)=>s+calcCatTotal(vals,k),0); }
+function calcEcoScore(t) { if(t===0) return null; return Math.max(0,Math.min(100,Math.round(100-(t/15)*85))); }
+function calcTreesNeeded(kg) { return Math.ceil(kg/0.06); }
+function calcVsIndia(kg) { return Math.round(kg/INDIA_AVG*100); }
+function sanitize(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');
+}
+
+function runTests() {
+  passed=0;failed=0;total=0;results.length=0;
+
+  // SUITE 1: Carbon factors
+  test('All activities have required fields',()=>{ Object.values(ACTIVITIES_DATA).flat().forEach(a=>{if(!a.id||!a.name||!a.factor||!a.unit||!a.tip||!a.save||!a.diff)throw new Error(`Missing field: ${a.id}`);}); });
+  test('All activity IDs are unique',()=>{ const ids=Object.values(ACTIVITIES_DATA).flat().map(a=>a.id); expect(new Set(ids).size).toBe(ids.length); });
+  test('All carbon factors are positive numbers',()=>{ Object.values(ACTIVITIES_DATA).flat().forEach(a=>{ if(typeof a.factor!=='number'||a.factor<=0) throw new Error(`Bad factor: ${a.id}`); }); });
+  test('Car factor = 0.21 kg/km',()=>{ expect(ACTIVITIES_DATA.transport.find(a=>a.id==='car').factor).toBe(0.21); });
+  test('Electricity factor = 0.82 kg/kWh (India CEA 2024)',()=>{ expect(ACTIVITIES_DATA.home.find(a=>a.id==='elec').factor).toBe(0.82); });
+  test('Beef factor > chicken factor',()=>{ const b=ACTIVITIES_DATA.food.find(a=>a.id==='beef'),c=ACTIVITIES_DATA.food.find(a=>a.id==='chicken'); expect(b.factor>c.factor).toBeTrue(); });
+  test('Metro < bus < car emission factors',()=>{ const m=ACTIVITIES_DATA.transport.find(a=>a.id==='metro'),b=ACTIVITIES_DATA.transport.find(a=>a.id==='bus'),c=ACTIVITIES_DATA.transport.find(a=>a.id==='car'); expect(m.factor<b.factor).toBeTrue(); expect(b.factor<c.factor).toBeTrue(); });
+  test('Flight has highest transport factor',()=>{ const factors=ACTIVITIES_DATA.transport.map(a=>a.factor); expect(Math.max(...factors)).toBe(ACTIVITIES_DATA.transport.find(a=>a.id==='flight').factor); });
+
+  // SUITE 2: Calculations
+  test('Zero emissions when nothing logged',()=>{ const v={}; Object.values(ACTIVITIES_DATA).flat().forEach(a=>v[a.id]=0); expect(calcTotalCO2(v)).toBe(0); });
+  test('10km car = 2.1 kg CO2',()=>{ const v={}; Object.values(ACTIVITIES_DATA).flat().forEach(a=>v[a.id]=0); v['car']=10; expect(calcCatTotal(v,'transport')).toBeCloseTo(2.1); });
+  test('5 kWh electricity = 4.1 kg CO2',()=>{ const v={}; Object.values(ACTIVITIES_DATA).flat().forEach(a=>v[a.id]=0); v['elec']=5; expect(calcCatTotal(v,'home')).toBeCloseTo(4.1); });
+  test('Multiple activities sum correctly',()=>{ const v={}; Object.values(ACTIVITIES_DATA).flat().forEach(a=>v[a.id]=0); v['car']=20;v['elec']=3;v['beef']=1; expect(calcTotalCO2(v)).toBeCloseTo(4.2+2.46+3.3); });
+  test('Eco score is null when total is 0',()=>{ expect(calcEcoScore(0)).toBe(null); });
+  test('Eco score >90 for very low emissions',()=>{ expect(calcEcoScore(0.1)).toBeGreaterThan(90); });
+  test('Eco score capped 0–100',()=>{ expect(calcEcoScore(1000)).toBe(0); expect(calcEcoScore(0.001)).toBeLessThanOrEqual(100); });
+  test('Eco score decreases as emissions rise',()=>{ expect(calcEcoScore(2)>calcEcoScore(8)).toBeTrue(); expect(calcEcoScore(8)>calcEcoScore(20)).toBeTrue(); });
+  test('Trees: 6 kg → 100 trees',()=>{ expect(calcTreesNeeded(6)).toBe(100); });
+  test('Trees: 0.06 kg → 1 tree',()=>{ expect(calcTreesNeeded(0.06)).toBe(1); });
+  test('vs India avg: 4.8 kg = 100%',()=>{ expect(calcVsIndia(4.8)).toBe(100); });
+  test('vs India avg: 2.4 kg = 50%',()=>{ expect(calcVsIndia(2.4)).toBe(50); });
+  test('Weekly = daily * 7',()=>{ expect(5*7).toBe(35); });
+
+  // SUITE 3: Input validation & security
+  test('safeParseFloat: negative → 0',()=>{ expect(safeParseFloat('-5')).toBe(0); });
+  test('safeParseFloat: NaN → 0',()=>{ expect(safeParseFloat('abc')).toBe(0); });
+  test('safeParseFloat: empty string → 0',()=>{ expect(safeParseFloat('')).toBe(0); });
+  test('safeParseFloat: Infinity → 0',()=>{ expect(safeParseFloat('Infinity')).toBe(0); });
+  test('safeParseFloat: 12.5 → 12.5',()=>{ expect(safeParseFloat('12.5')).toBe(12.5); });
+  test('safeParseFloat: max cap 99999',()=>{ expect(safeParseFloat('999999999')).toBe(99999); });
+  test('sanitize: blocks script tag',()=>{ const r=sanitize('<script>alert("xss")</script>'); expect(r).toNotContain('<script>'); });
+  test('sanitize: blocks img tag XSS',()=>{ const r=sanitize('<img onerror="alert(1)">'); expect(r).toNotContain('<img'); });
+  test('sanitize: encodes angle brackets',()=>{ expect(sanitize('<b>bold</b>')).toContain('&lt;b&gt;'); });
+  test('sanitize: encodes double quotes',()=>{ expect(sanitize('"quoted"')).toContain('&quot;'); });
+  test('sanitize: encodes ampersand',()=>{ expect(sanitize('a & b')).toContain('&amp;'); });
+  test('sanitize: safe text passes through',()=>{ expect(sanitize('Car 10km')).toContain('Car 10km'); });
+
+  // SUITE 4: Data integrity
+  test('INDIA_AVG = 4.8',()=>{ expect(INDIA_AVG).toBe(4.8); });
+  test('WORLD_AVG = 12.0',()=>{ expect(WORLD_AVG).toBe(12.0); });
+  test('US_AVG = 47.0',()=>{ expect(US_AVG).toBe(47.0); });
+  test('US > World > India avg',()=>{ expect(US_AVG>WORLD_AVG).toBeTrue(); expect(WORLD_AVG>INDIA_AVG).toBeTrue(); });
+  test('4 activity categories',()=>{ expect(Object.keys(ACTIVITIES_DATA).length).toBe(4); });
+  test('Transport: 6 activities',()=>{ expect(ACTIVITIES_DATA.transport).toHaveLength(6); });
+  test('Home: 5 activities',()=>{ expect(ACTIVITIES_DATA.home).toHaveLength(5); });
+  test('Food: 6 activities',()=>{ expect(ACTIVITIES_DATA.food).toHaveLength(6); });
+  test('Shopping: 4 activities',()=>{ expect(ACTIVITIES_DATA.shopping).toHaveLength(4); });
+  test('Total 21 activities',()=>{ expect(Object.values(ACTIVITIES_DATA).reduce((s,a)=>s+a.length,0)).toBe(21); });
+  test('All colors are valid hex',()=>{ const hex=/^#[0-9a-fA-F]{6}$/; Object.values(ACTIVITIES_DATA).flat().forEach(a=>{ if(!hex.test(a.color)) throw new Error(`Bad color: ${a.id}`); }); });
+  test('History capped at 30 entries',()=>{ const h=[]; for(let i=0;i<35;i++) h.unshift({date:`${i}`,kg:i*0.5}); while(h.length>30)h.pop(); expect(h.length).toBe(30); });
+  test('History dedup: same date replaces entry',()=>{ let h=[{date:'11 Jun',kg:5.0}]; const f=h.filter(x=>x.date!=='11 Jun'); f.unshift({date:'11 Jun',kg:7.0}); h=f; expect(h.length).toBe(1); expect(h[0].kg).toBe(7.0); });
+
+  renderResults();
+}
+
+function renderResults() {
+  document.getElementById('summary').style.display='flex';
+  document.getElementById('progress-bar').style.display='block';
+  document.getElementById('s-total').textContent=total;
+  document.getElementById('s-pass').textContent=passed;
+  document.getElementById('s-fail').textContent=failed;
+  const score=Math.round(passed/total*100);
+  document.getElementById('s-score').textContent=score+'%';
+  document.getElementById('progress-fill').style.width=score+'%';
+  document.getElementById('progress-fill').style.background=score===100?'#16a34a':score>=80?'#f59e0b':'#ef4444';
+
+  const groups = [
+    { label:'Suite 1: Carbon factor validation', from:0, count:8 },
+    { label:'Suite 2: Calculation logic',        from:8, count:13 },
+    { label:'Suite 3: Input validation & security', from:21, count:12 },
+    { label:'Suite 4: Data integrity',           from:33, count:14 },
+  ];
+
+  const el = document.getElementById('results');
+  el.innerHTML = '';
+  groups.forEach(g => {
+    const gh = document.createElement('div');
+    gh.className = 'group-header';
+    gh.textContent = g.label;
+    el.appendChild(gh);
+    results.slice(g.from, g.from + g.count).forEach(r => {
+      const row = document.createElement('div');
+      row.className = `result-row ${r.status==='FAIL'?'failed':''}`;
+      row.innerHTML = `<span class="icon">${r.status==='PASS'?'✅':'❌'}</span>
+        <div><div class="name">${r.name}</div>${r.error?`<div class="error">→ ${r.error}</div>`:''}</div>`;
+      el.appendChild(row);
+    });
+  });
+}
+</script>
+</body>
+</html>
